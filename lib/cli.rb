@@ -14,6 +14,7 @@ class CLI
         display_menu_options
         user_input
         goodbye
+        exit
     end
 
     def display_menu_options
@@ -21,9 +22,12 @@ class CLI
         puts "What would you like to do?"
         puts "--------------------------"
         puts "[id] Find tweet by id"
+        puts "[username] Find tweet by username"
         puts "[count] Tweets total count"
+        puts "[update] Update Tweet's username"
         puts "[list] Display all tweets"
-        puts "[delete] Delete tweet by id"
+        puts "[delete id] Delete tweet by id"
+        puts "[delete username] Delete tweet by username"
         puts "[new] Create a new tweet"
         puts "[exit] To exit the program"
         puts
@@ -39,11 +43,39 @@ class CLI
                 tweet = Tweet.find_by_id(id)
                 display_tweet(tweet)
                 menu
-            when "count"
-            when "list"
-                display_tweets
+            when "username"
+                puts "Enter a username:"
+                username = gets.strip.capitalize
+                tweets = Tweet.find_by_username(username)
+                display_tweets(tweets)
                 menu
-            when "delete"
+            when "count"
+                count = Tweet.count_all
+                display_count(count)
+                menu
+            when "update"
+                puts "Enter the old username you'd like to edit:"
+                old_username = gets.strip
+                puts "Enter the new username:"
+                new_username = gets.strip.capitalize
+                tweet = Tweet.update_by_username(old_username, new_username)
+                display_tweet(tweet)
+                menu
+            when "list"
+                display_tweets(Tweet.all)
+                menu
+            when "delete id"
+                puts "Please enter the id of the tweet you'd like to delete"
+                id = gets.strip
+                Tweet.delete_by_id(id)
+                display_tweets(Tweet.all) #delete the row from the db but it still created an empty object and displays as empty
+                menu
+            when "delete username"
+                puts "Please enter the username of the tweet you'd like to delete"
+                username = gets.strip.capitalize
+                Tweet.delete_by_username(username)
+                display_tweets(Tweet.all) #delete the rows from the db but it still created empty objects and displays as empty
+                menu
             when "new"
                 puts "Enter a username:"
                 username = gets.strip
@@ -68,12 +100,19 @@ class CLI
 
     def display_tweet(tweet)
         puts "\n--------------------\n"
+        # binding.pry
         puts "|#{tweet.id}. #{tweet.username} \n\n #{tweet.message}\n"
         puts "--------------------"
     end
 
-    def display_tweets
-        Tweet.all.each do |tweet|
+    def display_count(count)
+        puts
+        puts "The total count of rows is: #{count}"
+        puts 
+    end
+
+    def display_tweets(tweets)
+        tweets.each do |tweet|
             display_tweet(tweet)
         end
     end

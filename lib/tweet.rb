@@ -12,6 +12,7 @@ class Tweet
         hash.each do |k, v|
             self.send("#{k}=", v) if self.respond_to?("#{k}=")
         end
+        @id = hash["id"]
     end
 
     def self.create_table
@@ -70,6 +71,42 @@ class Tweet
         SQL
         tweet = DB[:conn].execute(sql, id).first
         new_from_db(tweet)
+    end
+
+    def self.find_by_username(username)
+        sql = <<-SQL
+                 SELECT * FROM tweets WHERE username = ?
+        SQL
+        tweets = DB[:conn].execute(sql, username)
+        map_from_db(tweets)
+    end
+
+    def self.update_by_username(old_username, new_username)
+        sql = <<-SQL
+                 UPDATE tweets SET username = ? WHERE username = ?
+        SQL
+        DB[:conn].execute(sql, new_username, old_username)
+    end
+
+    def self.delete_by_id(id)
+        sql = <<-SQL
+            DELETE FROM tweets WHERE id = ?
+        SQL
+        DB[:conn].execute(sql, id) 
+    end
+
+    def self.delete_by_username(username)
+        sql = <<-SQL
+            DELETE FROM tweets WHERE username = ?
+        SQL
+        DB[:conn].execute(sql, username)
+    end
+
+    def self.count_all
+        sql = <<-SQL
+            SELECT COUNT(*) FROM tweets
+        SQL
+        DB[:conn].execute(sql).first.values.first
     end
 
 end
